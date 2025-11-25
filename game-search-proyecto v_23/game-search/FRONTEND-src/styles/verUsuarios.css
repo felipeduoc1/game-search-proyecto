@@ -1,0 +1,94 @@
+/* 🎨 verUsuario.css */
+:root {
+  --violeta-fondo: #2a1456;
+  --negro: #181818;
+  --azul-claro: #6ec1e4;
+  --gris-claro: #e0e0e0;
+  --gris-medio: #888;
+}
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--negro);
+  color: var(--gris-claro);
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  background-color: var(--violeta-fondo);
+}
+
+header h1 {
+  color: var(--azul-claro);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.formulario {
+  background-color: var(--negro);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  margin: 0 auto;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+}
+
+.formulario p {
+  margin: 0.8rem 0;
+  color: var(--gris-claro);
+}
+
+strong {
+  color: var(--azul-claro);
+}
+
+.btn-secondary {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  background-color: var(--gris-medio);
+  color: var(--negro);
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn-secondary:hover {
+  background-color: var(--azul-claro);
+  color: var(--violeta-fondo);
+}
+
+/* === Adaptabilidad admin === */
+@media (max-width: 1024px) {
+  .admin-layout {
+    grid-template-columns: 200px 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar-admin {
+    position: static;
+    width: 100%;
+    height: auto;
+  }
+
+  .tabla, .tabla-container {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .card, .formulario {
+    padding: 1rem;
+  }
+  h1, h2 {
+    font-size: 1.2rem;
+  }
+}

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ESTA ES LA SECCIÓN MÁS IMPORTANTE -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.5</version> <!-- Usa una versión reciente de Spring Boot 3 -->
+        <relativePath/> <!-- No borrar esta línea -->
+    </parent>
+
+    <groupId>com.example</groupId>
+    <artifactId>game-search-parent</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging> <!-- Este POM es de tipo 'pom' porque agrupa a otros -->
+    <name>game-search-parent</name>
+    <description>POM padre para el proyecto de búsqueda de juegos</description>
+
+    <properties>
+        <java.version>21</java.version>
+        <!-- Define la versión de Spring Cloud aquí para que todos los hijos la usen -->
+        <spring-cloud.version>2023.0.1</spring-cloud.version>
+    </properties>
+
+    <!-- Lista los módulos que este padre gestiona -->
+    <modules>
+        <module>m1-review-service</module>
+        <module>m2-user-service</module>
+        <module>m3-game-service</module>
+        <module>m4-eureka-server</module>
+    </modules>
+
+    <!-- Gestiona las versiones de las dependencias para todos los módulos hijos -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>
