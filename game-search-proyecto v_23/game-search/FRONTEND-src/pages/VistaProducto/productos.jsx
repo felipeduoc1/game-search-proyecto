@@ -3,6 +3,7 @@ import Header from "../../components/Header";
 import "../../styles/productos.css";
 import { productos } from "../../validaciones/BDproductos";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 // 🖼️ Importación de imágenes
 import EldenRing from "../../img/Elden-Ring.webp";
@@ -20,6 +21,7 @@ import SpiderMan from "../../img/SpiderMan.avif";
 
 export default function Productos() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const imagenes = {
     "img/Elden-Ring.webp": EldenRing,
     "img/Zelda.webp": Zelda,
@@ -78,8 +80,7 @@ export default function Productos() {
 
   // 🔹 Verificar sesión antes de agregar al carrito
   const handleAgregarCarrito = (producto) => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user) {
+    if (!isAuthenticated) {
       alert("Debes iniciar sesión para agregar productos al carrito.");
       navigate("/login");
       return;

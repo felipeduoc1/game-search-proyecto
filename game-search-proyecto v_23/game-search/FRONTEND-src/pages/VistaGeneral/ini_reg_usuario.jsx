@@ -1,54 +1,72 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import '../../styles/ini_reg_usuario.css';
 import Header from "../../components/Header";
 import useValidacionesInicioSesion from "../../validaciones/valInicioSesion";
 import useValidacionesIniRegUsuario from "../../validaciones/valCrearUsuarios";
+import { useAuth } from "../../context/AuthContext";
 
 const IniRegUsuario = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login, register } = useAuth();
 
   // hooks separados: login y registro (solo validaciones en tiempo real)
   useValidacionesInicioSesion();
   useValidacionesIniRegUsuario();
 
   // 🔹 Manejo de inicio de sesión
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     const email = document.getElementById("login-email").value.trim();
     const pass = document.getElementById("login-pass").value.trim();
-    const rol = document.getElementById("rol").value;
+    const rolSeleccionado = document.getElementById("rol").value;
 
-    if (!email || !pass || !rol) {
+    if (!email || !pass || !rolSeleccionado) {
       alert("Por favor completa todos los campos.");
       return;
     }
 
-    const user = { email, rol, nombre: email.split("@")[0] };
-    localStorage.setItem("user", JSON.stringify(user));
-    window.dispatchEvent(new Event("userLoggedIn"));
-
-    if (rol === "admin") navigate("/admin");
-    else if (rol === "vendedor") navigate("/vendedor");
-    else navigate("/productos");
+    try {
+      const loggedUser = await login(email, pass);
+      if (rolSeleccionado && loggedUser.rol !== rolSeleccionado) {
+        alert(`Has iniciado sesión como ${loggedUser.rol}, no como ${rolSeleccionado}.`);
+      }
+      const redirect = location.state?.from ||
+        (loggedUser.rol === "admin"
+          ? "/admin"
+          : loggedUser.rol === "vendedor"
+            ? "/vendedor"
+            : "/productos");
+      navigate(redirect);
+    } catch (err) {
+      alert(err.message || "No se pudo iniciar sesión");
+    }
   };
 
   // 🔹 Acceso rápido (nuevo para Cliente, y ya estaban Admin y Vendedor)
-  const handleQuickAccess = (rol) => {
-    let destino = "/";
-    if (rol === "cliente") destino = "/productos";
-    if (rol === "vendedor") destino = "/vendedor";
-    if (rol === "admin") destino = "/admin";
+  const quickCredentials = {
+    cliente: { email: "cliente@gamesearch.com", password: "Cliente123!" },
+    vendedor: { email: "vendedor@gamesearch.com", password: "Vendedor123!" },
+    admin: { email: "admin@gamesearch.com", password: "Admin123!" },
+  };
 
-    const user = { email: `${rol}@gamesearch.com`, rol, nombre: rol };
-    localStorage.setItem("user", JSON.stringify(user));
-    window.dispatchEvent(new Event("userLoggedIn"));
-    navigate(destino);
+  const handleQuickAccess = async (rol) => {
+    const destino =
+      rol === "admin" ? "/admin" : rol === "vendedor" ? "/vendedor" : "/productos";
+
+    try {
+      const creds = quickCredentials[rol];
+      await login(creds.email, creds.password);
+      navigate(destino);
+    } catch (err) {
+      alert(err.message || "No se pudo iniciar sesión con acceso rápido");
+    }
   };
 
   // 🔹 Manejo de registro (solo simulado)
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
 
     const nombre = document.getElementById("reg-nombre").value.trim();
@@ -66,7 +84,13 @@ const IniRegUsuario = () => {
       return;
     }
 
-    alert("Usuario registrado correctamente (simulado)");
+    try {
+      await register({ nombre, email, password: pass, rol: "cliente" });
+      alert("Usuario registrado correctamente");
+      navigate("/productos");
+    } catch (err) {
+      alert(err.message || "No se pudo registrar al usuario");
+    }
   };
 
   return (

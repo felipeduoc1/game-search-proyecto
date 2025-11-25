@@ -1,11 +1,12 @@
 // App.jsx
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import PaginaP from "./pages/VistaGeneral/paginaP";
 import Productos from "./pages/VistaProducto/productos";
 import Nosotros from "./pages/VistaGeneral/nosotros";
 import Comunidad from "./pages/VistaGeneral/comunidad";
 import Contacto from "./pages/VistaGeneral/contacto";
 import IniRegUsuario from "./pages/VistaGeneral/ini_reg_usuario";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Páginas del vendedor
 import PPrincipalVendedor from "./pages/VistaVendedor/pPrincipalVendedor";
@@ -40,22 +41,120 @@ function App() {
       <Route path="/login" element={<IniRegUsuario />} />
 
       {/* Vendedor */}
-      <Route path="/vendedor" element={<PPrincipalVendedor />} />
-      <Route path="/vendedor/productos" element={<ProductosVendedor />} />
-      <Route path="/vendedor/productos/ver/:id" element={<VerProductosVendedor />} />
-      <Route path="/vendedor/productos/editar/:id" element={<EdicionProductoVendedor />} />
-      <Route path="/vendedor/productos/crear" element={<CrearProductoVendedor />} />
+      <Route
+        path="/vendedor"
+        element={
+          <ProtectedRoute roles={["vendedor", "admin"]}>
+            <PPrincipalVendedor />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/vendedor/productos"
+        element={
+          <ProtectedRoute roles={["vendedor", "admin"]}>
+            <ProductosVendedor />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/vendedor/productos/ver/:id"
+        element={
+          <ProtectedRoute roles={["vendedor", "admin"]}>
+            <VerProductosVendedor />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/vendedor/productos/editar/:id"
+        element={
+          <ProtectedRoute roles={["vendedor", "admin"]}>
+            <EdicionProductoVendedor />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/vendedor/productos/crear"
+        element={
+          <ProtectedRoute roles={["vendedor", "admin"]}>
+            <CrearProductoVendedor />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Administrador */}
-      <Route path="/admin" element={<PPrincipalAdmin />} />
-      <Route path="/admin/productos" element={<ProductosAdmin />} />
-      <Route path="/admin/productos/ver/:id" element={<VerProductosAdmin />} />
-      <Route path="/admin/productos/crear" element={<CrearProductosAdmin />} />
-      <Route path="/admin/productos/editar/:id" element={<EdicionProductoAdmin />} />
-      <Route path="/admin/usuarios/registro" element={<RegistroUsuarios />} /> {/* ✅ Ruta correcta */}
-      <Route path="/admin/usuarios" element={<Usuarios />} />
-      <Route path="/admin/usuarios/editar" element={<EditarUsuarios />} />
-      <Route path="/admin/usuarios/ver" element={<VerUsuario />} />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <PPrincipalAdmin />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/productos"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <ProductosAdmin />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/productos/ver/:id"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <VerProductosAdmin />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/productos/crear"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <CrearProductosAdmin />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/productos/editar/:id"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <EdicionProductoAdmin />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/usuarios/registro"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <RegistroUsuarios />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/usuarios"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <Usuarios />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/usuarios/editar"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <EditarUsuarios />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/usuarios/ver"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <VerUsuario />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

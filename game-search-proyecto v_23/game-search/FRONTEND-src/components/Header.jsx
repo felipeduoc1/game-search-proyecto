@@ -2,12 +2,13 @@ import { Link, useNavigate } from "react-router-dom";
 import "../styles/header.css";
 import React, { useState, useEffect } from "react";
 import CartModal from "./CartModal";
+import { useAuth } from "../context/AuthContext";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function Header() {
   const [cartCount, setCartCount] = useState(0);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,28 +22,18 @@ export default function Header() {
       }
     };
 
-    const loadUser = () => {
-      const u = JSON.parse(localStorage.getItem("user"));
-      setUser(u);
-    };
-
     loadCart();
-    loadUser();
 
     window.addEventListener("cartUpdated", loadCart);
-    window.addEventListener("userLoggedIn", loadUser);
-    window.addEventListener("userLoggedOut", loadUser);
 
     return () => {
       window.removeEventListener("cartUpdated", loadCart);
-      window.removeEventListener("userLoggedIn", loadUser);
-      window.removeEventListener("userLoggedOut", loadUser);
     };
   }, []);
 
   // ✅ Si no hay sesión, mandar a login cuando toca el carrito
   const handleCartClick = () => {
-    if (!user) {
+    if (!isAuthenticated) {
       navigate("/login");
     } else {
       setIsCartOpen(true);
@@ -51,8 +42,7 @@ export default function Header() {
 
   // ✅ Cierre de sesión
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    window.dispatchEvent(new Event("userLoggedOut"));
+    logout();
     navigate("/");
   };
 
@@ -73,10 +63,10 @@ export default function Header() {
             <Link to="/comunidad" className="text-white text-decoration-none">Comunidad</Link>
             <Link to="/contacto" className="text-white text-decoration-none">Contacto</Link>
 
-            {user ? (
+            {isAuthenticated ? (
               <>
                 <span className="text-info small">
-                  Iniciado como cliente
+                  Iniciado como {user?.rol || "usuario"}
                 </span>
                 <button onClick={handleLogout} className="btn btn-outline-light btn-sm">
                   Cerrar Sesión
