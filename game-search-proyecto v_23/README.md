@@ -1,16 +1,21 @@
-# React + Vite
+# Game Search - Autenticación y Roles
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Backend
+- API Node/Express con autenticación basada en tokens JWT.
+- Usuarios de ejemplo en memoria con contraseñas encriptadas (admin, vendedor, cliente).
+- Middlewares `authenticateToken` y `authorizeRoles` protegen rutas y verifican roles.
+- Endpoints principales: `/api/auth/login`, `/api/auth/register`, `/api/auth/me` y rutas protegidas para admin, vendedor y cliente.
 
-Currently, two official plugins are available:
+## Frontend
+- Contexto de autenticación (`AuthContext`) que persiste sesión en `localStorage` (token + usuario).
+- `ProtectedRoute` bloquea rutas si no hay sesión o si el rol no tiene permisos.
+- `App.jsx` aplica las rutas protegidas para vistas de administrador y vendedor.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Uso rápido
+- Clonar el repo y ubicarse en `game-search-proyecto v_23`.
+- Backend: `cd BACKEND && npm install && npm start` (puerto 3001 por defecto).
+- Frontend: `cd game-search && npm install && npm run dev` (Vite en puerto 5173 por defecto).
+- Credenciales demo:
+  - Admin: `admin@gamesearch.com` / `Admin123!`
+  - Vendedor: `vendedor@gamesearch.com` / `Vendedor123!`
+  - Cliente: `cliente@gamesearch.com` / `Cliente123!`

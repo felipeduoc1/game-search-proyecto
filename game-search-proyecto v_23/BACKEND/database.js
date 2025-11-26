@@ -1,17 +1,9 @@
-// /mi-backend/database.js
-
 const oracledb = require('oracledb');
 require('dotenv').config(); // Carga las variables del archivo .env
 
-// --- ¡IMPORTANTE! ---
-// Llama a initOracleClient() ANTES de cualquier otra llamada a oracledb.
-// Reemplaza con la ruta REAL donde descomprimiste el Instant Client.
-try {
-    oracledb.initOracleClient({ libDir: "C:\\Users\\Israel\\instantclient-basic-windows.x64-23.26.0.0.0\\instantclient_23_0" });
-} catch (err) {
-    console.error('Error al iniciar el Oracle Client:', err);
-    process.exit(1);
-}
+// ❗ Importante:
+// NO llamar a oracledb.initOracleClient()
+// Esto activa el modo THIN que NO requiere Oracle Client instalado.
 
 // Configuración del pool de conexiones usando variables de entorno
 const poolConfig = {
