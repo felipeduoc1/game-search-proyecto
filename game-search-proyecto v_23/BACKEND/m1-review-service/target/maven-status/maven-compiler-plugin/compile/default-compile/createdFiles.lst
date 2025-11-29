@@ -1,3 +1,4 @@
+com\example\reviewservice\controller\ReviewController.class
 com\example\reviewservice\repository\ReviewRepository.class
 com\example\reviewservice\entity\Review.class
 com\example\reviewservice\ReviewServiceApplication.class

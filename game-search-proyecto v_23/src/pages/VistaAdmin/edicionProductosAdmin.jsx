@@ -1,130 +1,166 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import SidebarAdmin from "../../components/SidebarAdmin";
-import "../../styles/edicionProductosVendedor.css";
-import { productos } from "../../validaciones/BDproductos";
-import useValidacionesEditarProducto from "../../validaciones/valEditarProducto";
+// Reutilizamos estilos
+import "../../styles/crearProductoAdmin.css";
 
 const EdicionProductosAdmin = () => {
-  const { id } = useParams(); // ID desde la URL
+  const { id } = useParams(); // Obtenemos el ID de la URL
   const navigate = useNavigate();
-  const [producto, setProducto] = useState(null);
 
-  useValidacionesEditarProducto(); // tus validaciones personalizadas
+  const [cargando, setCargando] = useState(true);
+  const [guardando, setGuardando] = useState(false);
 
-  // Buscar el producto al cargar
+  // Estado del formulario
+  const [producto, setProducto] = useState({
+    nombre: "",
+    categoria: "",
+    // Campos visuales (no en BD aun)
+    precio: 59990,
+    stock: 10,
+    descripcion: "",
+    imagen: "" // Guardamos la URL de la imagen para no perderla al editar
+  });
+
+  // --- 1. CARGAR DATOS DEL JUEGO AL INICIAR ---
   useEffect(() => {
-    const encontrado = productos.find((p) => p.id === parseInt(id));
-    if (encontrado) {
-      setProducto({ ...encontrado });
-    } else {
-      console.warn("Producto no encontrado");
-      navigate("/admin/productos");
-    }
+    // GET /api/games/{id}
+    fetch(`http://localhost:8888/api/games/${id}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Juego no encontrado");
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Datos para editar:", data);
+        setProducto({
+          nombre: data.name,
+          categoria: data.genre,
+          precio: 59990, // Falso
+          stock: 20, // Falso
+          descripcion: "Descripción importada de Oracle",
+          imagen: data.imageUrl // Importante: Guardamos la imagen actual
+        });
+        setCargando(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("Error al cargar el juego. Puede que no exista.");
+        navigate("/admin/productos");
+      });
   }, [id, navigate]);
 
-  // Actualizar campos del formulario
   const handleChange = (e) => {
     const { id, value } = e.target;
     setProducto((prev) => ({ ...prev, [id]: value }));
   };
 
-  // Guardar cambios (por ahora solo modifica el array en memoria)
-  const handleSubmit = (e) => {
+  // --- 2. GUARDAR CAMBIOS (PUT) ---
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const index = productos.findIndex((p) => p.id === producto.id);
-    if (index !== -1) {
-      productos[index] = { ...producto };
-      alert("✅ Producto actualizado correctamente (simulado)");
-      navigate("/admin/productos");
+    setGuardando(true);
+
+    // Objeto para el Backend Java
+    const juegoActualizado = {
+      name: producto.nombre,
+      genre: producto.categoria,
+      imageUrl: producto.imagen // Mantenemos la imagen que tenía (o la que edites si agregas input)
+    };
+
+    try {
+      console.log("Actualizando ID:", id, juegoActualizado);
+
+      const response = await fetch(`http://localhost:8888/api/games/${id}`, {
+        method: "PUT", // Verbo HTTP para actualizar
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(juegoActualizado),
+      });
+
+      if (response.ok) {
+        alert("✅ Producto actualizado correctamente en Oracle.");
+        navigate("/admin/productos");
+      } else {
+        alert("❌ Error al actualizar. Código: " + response.status);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("❌ Error de conexión con el Backend.");
+    } finally {
+      setGuardando(false);
     }
   };
 
-  if (!producto) return <p>Cargando producto...</p>;
+  if (cargando) return (
+    <div className="page-container">
+      <SidebarAdmin />
+      <main className="main-content">
+        <p style={{ color: "white", textAlign: "center", marginTop: "50px" }}>Cargando datos del juego...</p>
+      </main>
+    </div>
+  );
 
   return (
     <div className="page-container">
       <SidebarAdmin />
-
       <main className="main-content">
         <header>
-          <h1>Editar Producto</h1>
+          <h1>Editar Producto (ID: {id})</h1>
         </header>
 
-        <form onSubmit={handleSubmit} className="formulario" id="formulario">
-          <div id="formulario_nombre" className="nombre">
+        <form onSubmit={handleSubmit} className="formulario">
+
+          <div className="nombre">
             <label htmlFor="nombre">Nombre</label>
             <div className="formulario__grupo-input">
               <input
                 type="text"
-                className="formulario__input"
                 id="nombre"
+                className="formulario__input"
                 value={producto.nombre}
                 onChange={handleChange}
+                required
               />
             </div>
-            <p className="error" id="error-nombre"></p>
           </div>
 
-          <div id="formulario_categoria" className="categoria">
+          <div className="categoria">
             <label htmlFor="categoria">Categoría</label>
             <div className="formulario__grupo-input">
               <input
                 type="text"
-                className="formulario__input"
                 id="categoria"
+                className="formulario__input"
                 value={producto.categoria}
                 onChange={handleChange}
+                required
               />
             </div>
-            <p className="error" id="error-categoria"></p>
           </div>
 
-          <div id="formulario_precio" className="precio">
+          {/* Precio y Stock (Solo visuales) */}
+          <div className="precio">
             <label htmlFor="precio">Precio</label>
             <div className="formulario__grupo-input">
               <input
                 type="number"
-                className="formulario__input"
                 id="precio"
+                className="formulario__input"
                 value={producto.precio}
                 onChange={handleChange}
               />
             </div>
-            <p className="error" id="error-precio"></p>
+            <small style={{ color: "gray" }}>* Dato visual</small>
           </div>
 
-          <div id="formulario_stock" className="stock">
-            <label htmlFor="stock">Stock</label>
-            <div className="formulario__grupo-input">
-              <input
-                type="number"
-                className="formulario__input"
-                id="stock"
-                value={producto.stock || 0}
-                onChange={handleChange}
-              />
-            </div>
-            <p className="error" id="error-stock"></p>
-          </div>
-
-          <div id="descripcion" className="descripcion">
-            <label htmlFor="descripcion">Descripción</label>
-            <textarea
-              id="descripcion"
-              rows="4"
-              value={producto.descripcion}
-              onChange={handleChange}
-            ></textarea>
-          </div>
-
-          <div id="submit" className="submit">
-            <button type="submit" className="btn-primary">
-              Guardar Cambios
+          <div className="submit">
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={guardando}
+              style={{ opacity: guardando ? 0.7 : 1 }}
+            >
+              {guardando ? "Guardando..." : "Guardar Cambios"}
             </button>
-            <Link to="/admin/productos" className="btn-secondary">
-              Cancelar
-            </Link>
+            <Link to="/admin/productos" className="btn-secondary">Cancelar</Link>
           </div>
         </form>
       </main>

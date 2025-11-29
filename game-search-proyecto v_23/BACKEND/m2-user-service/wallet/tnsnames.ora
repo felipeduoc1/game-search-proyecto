@@ -1,0 +1,12 @@
+webgamesearch_high = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-valparaiso-1.oraclecloud.com))(connect_data=(service_name=gc647c48fe71780_webgamesearch_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+webgamesearch_low = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-valparaiso-1.oraclecloud.com))(connect_data=(service_name=gc647c48fe71780_webgamesearch_low.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+webgamesearch_medium = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-valparaiso-1.oraclecloud.com))(connect_data=(service_name=gc647c48fe71780_webgamesearch_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+webgamesearch_tp = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-valparaiso-1.oraclecloud.com))(connect_data=(service_name=gc647c48fe71780_webgamesearch_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+webgamesearch_tpurgent = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-valparaiso-1.oraclecloud.com))(connect_data=(service_name=gc647c48fe71780_webgamesearch_tpurgent.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+
+

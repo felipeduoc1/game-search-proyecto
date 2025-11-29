@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import CartModal from "./CartModal";
 import { useAuth } from "../context/AuthContext";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import CarritoModal from '../pages/VistaCarrito/carrito'; // Importa el nuevo componente
 
 export default function Header() {
   const [cartCount, setCartCount] = useState(0);
@@ -30,6 +31,8 @@ export default function Header() {
       window.removeEventListener("cartUpdated", loadCart);
     };
   }, []);
+
+
 
   // ✅ Si no hay sesión, mandar a login cuando toca el carrito
   const handleCartClick = () => {

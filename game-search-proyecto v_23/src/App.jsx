@@ -1,5 +1,4 @@
-// App.jsx
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import PaginaP from "./pages/VistaGeneral/paginaP";
 import Productos from "./pages/VistaProducto/productos";
 import Nosotros from "./pages/VistaGeneral/nosotros";
@@ -20,8 +19,10 @@ import PPrincipalAdmin from "./pages/VistaAdmin/pPrincipalAdmin";
 import ProductosAdmin from "./pages/VistaAdmin/productosAdmin";
 import VerProductosAdmin from "./pages/VistaAdmin/verProductosAdmin";
 import CrearProductosAdmin from "./pages/VistaAdmin/crearProductoAdmin";
-import EdicionProductoAdmin from "./pages/VistaAdmin/edicionProductosAdmin";
-import RegistroUsuarios from "./pages/VistaAdmin/registroUsuarios"; // ✅ CORREGIDO: antes estaba en VistaGeneral
+// CORRECCIÓN: Importamos el componente de edición con el nombre correcto
+import EdicionProductosAdmin from "./pages/VistaAdmin/edicionProductosAdmin";
+
+import RegistroUsuarios from "./pages/VistaAdmin/registroUsuarios";
 import Usuarios from "./pages/VistaAdmin/usuarios";
 import EditarUsuarios from "./pages/VistaAdmin/editarUsuarios";
 import VerUsuario from "./pages/VistaAdmin/verUsuario";
@@ -115,14 +116,17 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+      {/* RUTA CORREGIDA: Edición de productos Admin */}
       <Route
         path="/admin/productos/editar/:id"
         element={
           <ProtectedRoute roles={["admin"]}>
-            <EdicionProductoAdmin />
+            <EdicionProductosAdmin />
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/admin/usuarios/registro"
         element={
@@ -155,6 +159,9 @@ function App() {
           </ProtectedRoute>
         }
       />
+
+      {/* cualquier ruta rara manda directo al inicio */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

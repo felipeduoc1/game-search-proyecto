@@ -1,107 +1,125 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useState, useContext, useEffect, useMemo } from "react";
 
 const AuthContext = createContext();
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
-const getStoredSession = () => {
-  try {
-    const raw = localStorage.getItem("auth-session");
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch (err) {
-    console.warn("No se pudo leer la sesión almacenada", err);
-    return null;
-  }
-};
-
-const persistSession = (session) => {
-  try {
-    if (session) {
-      localStorage.setItem("auth-session", JSON.stringify(session));
-    } else {
-      localStorage.removeItem("auth-session");
-    }
-  } catch (err) {
-    console.warn("No se pudo persistir la sesión", err);
-  }
-};
+// ✅ CORRECCIÓN: Volvemos al Gateway Local (Tu puerto seguro)
+const API_URL = "http://localhost:8888";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setLoading] = useState(true);
 
+  // Cargar sesión guardada al iniciar
   useEffect(() => {
-    const stored = getStoredSession();
-    if (stored?.token && stored?.user) {
-      setUser(stored.user);
-      setToken(stored.token);
+    const storedSession = localStorage.getItem("auth-session");
+    if (storedSession) {
+      try {
+        const parsed = JSON.parse(storedSession);
+        setUser(parsed.user);
+        setIsAuthenticated(true);
+      } catch (e) {
+        localStorage.removeItem("auth-session");
+      }
     }
-    setIsLoading(false);
+    setLoading(false);
   }, []);
 
   const login = async (email, password) => {
-    const response = await fetch(`${API_URL}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      console.log("Intentando login en:", API_URL);
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: "Error de autenticación" }));
-      throw new Error(error.message || "No se pudo iniciar sesión");
+      const response = await fetch(`${API_URL}/api/users`);
+
+      if (!response.ok) throw new Error("No se pudo conectar con el Backend");
+
+      const users = await response.json();
+
+      // --- CÓDIGO ESPÍA (AGREGA ESTO) ---
+      console.log("🔍 Usuarios descargados de Oracle:", users);
+      console.log("📧 Email buscado:", email);
+      console.log("🔑 Contraseña buscada:", password);
+      // ----------------------------------
+
+      // Buscamos coincidencia manual (Asegúrate de que las propiedades sean 'email' y 'password')
+      // A veces Oracle/Java devuelve 'correo' o 'contrasena' si no definiste bien el JSON.
+      const foundUser = users.find(u => u.email === email && u.password === password);
+
+      if (foundUser) {
+        // Asignar rol simulado basado en el correo
+        let rol = "cliente";
+        if (email.toLowerCase().includes("admin")) rol = "admin";
+        if (email.toLowerCase().includes("vendedor")) rol = "vendedor";
+
+        const userWithRol = { ...foundUser, rol };
+
+        setUser(userWithRol);
+        setIsAuthenticated(true);
+        localStorage.setItem("auth-session", JSON.stringify({ user: userWithRol }));
+        return userWithRol;
+      } else {
+        throw new Error("Credenciales incorrectas");
+      }
+    } catch (error) {
+      console.error("Error Login:", error);
+      throw error;
     }
-
-    const data = await response.json();
-    setUser(data.user);
-    setToken(data.token);
-    persistSession({ user: data.user, token: data.token });
-    return data.user;
   };
 
+  // --- REGISTRO (POST al Gateway -> Oracle) ---
   const register = async ({ nombre, email, password, rol = "cliente" }) => {
-    const response = await fetch(`${API_URL}/api/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nombre, email, password, rol }),
-    });
+    try {
+      console.log("Enviando registro al Gateway...");
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: "Error al registrar" }));
-      throw new Error(error.message || "No se pudo registrar");
+      // ✅ CORRECCIÓN: Apuntamos a /api/users/register del Gateway
+      const response = await fetch(`${API_URL}/api/users/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Enviamos el objeto tal como lo espera tu clase User en Java
+        body: JSON.stringify({
+          username: nombre,
+          email: email,
+          password: password,
+          rol: rol
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Error ${response.status}: ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log("Registrado exitosamente:", data);
+
+      // Auto-login después del registro
+      const newUser = { ...data, rol: "cliente" };
+      setUser(newUser);
+      setIsAuthenticated(true);
+      localStorage.setItem("auth-session", JSON.stringify({ user: newUser }));
+
+      return newUser;
+    } catch (error) {
+      console.error("Error en registro:", error);
+      throw error;
     }
-
-    const data = await response.json();
-    setUser(data.user);
-    setToken(data.token);
-    persistSession({ user: data.user, token: data.token });
-    return data.user;
   };
 
   const logout = () => {
     setUser(null);
-    setToken(null);
-    persistSession(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem("auth-session");
   };
 
   const hasRole = (roles = []) => {
     if (!user) return false;
-    return roles.length === 0 || roles.includes(user.rol);
+    if (!roles.length) return true;
+    return roles.includes(user.rol);
   };
 
-  const value = useMemo(
-    () => ({
-      user,
-      token,
-      isAuthenticated: Boolean(user && token),
-      isLoading,
-      login,
-      register,
-      logout,
-      hasRole,
-    }),
-    [user, token, isLoading]
-  );
+  const value = useMemo(() => ({
+    user, isAuthenticated, login, register, logout, hasRole, isLoading
+  }), [user, isAuthenticated, isLoading]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

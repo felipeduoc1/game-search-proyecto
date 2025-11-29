@@ -6,17 +6,19 @@
         <groupId>com.example</groupId>
         <artifactId>game-search-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath> <!-- Apunta al POM padre en la carpeta BACKEND -->
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>m2-user-service</artifactId> <!-- Esto debe coincidir con el pom.xml padre -->
+    <artifactId>m2-user-service</artifactId>
     <name>m2-user-service</name>
-    <description>Microservicio M2 para la gestión de usuarios</description> <!-- Corregido -->
+    <description>Microservicio M2 para la gestión de usuarios</description>
+    
     <properties>
-    <java.version>21</java.version>
-</properties>
+        <java.version>21</java.version>
+    </properties>
 
     <dependencies>
+        <!-- Spring Boot Web & Data -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -25,32 +27,53 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
+
+        <!-- DRIVER ORACLE (Versión 11 para Java 17/21) -->
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc11</artifactId>
-            <scope>runtime</scope>
         </dependency>
+
+        <!-- SEGURIDAD ORACLE (Obligatorio para Wallet) -->
+        <dependency>
+            <groupId>com.oracle.database.security</groupId>
+            <artifactId>oraclepki</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.database.security</groupId>
+            <artifactId>osdt_cert</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.database.security</groupId>
+            <artifactId>osdt_core</artifactId>
+        </dependency>
+
+        <!-- Eureka Client -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
+        <!-- Swagger / OpenAPI -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.5.0</version>
         </dependency>
+
+        <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-            </dependency>
 
-        <!-- Opcional: Spring Security para autenticación -->
-        <!--
+        <!-- Spring Security (Comentado hasta que lo implementemos) -->
+        <!-- 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
+        </dependency> 
         -->
     </dependencies>
 

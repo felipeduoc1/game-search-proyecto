@@ -52,13 +52,23 @@ const IniRegUsuario = () => {
     admin: { email: "admin@gamesearch.com", password: "Admin123!" },
   };
 
-  const handleQuickAccess = async (rol) => {
-    const destino =
-      rol === "admin" ? "/admin" : rol === "vendedor" ? "/vendedor" : "/productos";
-
+  const handleQuickAccess = async (rolEsperado) => {
     try {
-      const creds = quickCredentials[rol];
-      await login(creds.email, creds.password);
+      const creds = quickCredentials[rolEsperado];
+      const loggedUser = await login(creds.email, creds.password);
+
+      // Redirigimos SEGÚN el rol REAL que vino del backend
+      const destino =
+        loggedUser.rol === "admin"
+          ? "/admin"
+          : loggedUser.rol === "vendedor"
+          ? "/vendedor"
+          : "/productos";
+
+      if (loggedUser.rol !== rolEsperado) {
+        alert(`El backend indica que este usuario es ${loggedUser.rol}, no ${rolEsperado}.`);
+      }
+
       navigate(destino);
     } catch (err) {
       alert(err.message || "No se pudo iniciar sesión con acceso rápido");

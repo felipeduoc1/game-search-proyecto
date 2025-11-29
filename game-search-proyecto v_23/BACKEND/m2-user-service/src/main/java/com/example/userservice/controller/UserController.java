@@ -16,13 +16,15 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    // Endpoint para REGISTRO: POST /api/users/register
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
-        // Aquí podrías añadir validación (ej. si el usuario ya existe)
-        User savedUser = userRepository.save(user);
-        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+        // Guardamos en Oracle
+        User nuevoUsuario = userRepository.save(user);
+        return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
     }
 
+    // Endpoint para LOGIN (Listar todos): GET /api/users
     @GetMapping
     public List<User> getAllUsers() {
         return userRepository.findAll();

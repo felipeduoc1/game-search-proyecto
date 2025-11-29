@@ -1,30 +1,41 @@
 package com.example.reviewservice.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column; // Asegúrate de importar esto
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "REVIEWS")
 public class Review {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "review_seq")
-    @SequenceGenerator(name = "review_seq", sequenceName = "REVIEWS_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long gameId; // ID del juego (del game-search service)
-    private Long userId; // ID del usuario (del user-service)
-    private int rating; // Calificación, ej. 1 a 5
-    @Column(name = "REVIEW_COMMENT")
-    private String comment; // Mapeado a la columna REVIEW_COMMENT en la BD
+    private Long gameId;
 
-    // Getters y Setters
+    // ✅ Este es el campo clave para que se guarde el nombre
+    private String username;
 
+    // ✅ Usamos 'comment' porque así lo envía tu React
+    @Column(name = "REVIEW_COMMENT", length = 1000)
+    private String comment;
+
+    private int rating;
+    private LocalDateTime fecha;
+
+    public Review() {
+        this.fecha = LocalDateTime.now();
+    }
+
+    public Review(Long gameId, String username, String comment, int rating) {
+        this.gameId = gameId;
+        this.username = username;
+        this.comment = comment;
+        this.rating = rating;
+        this.fecha = LocalDateTime.now();
+    }
+
+    // Getters y Setters (Vitales para que funcione)
     public Long getId() {
         return id;
     }
@@ -41,12 +52,20 @@ public class Review {
         this.gameId = gameId;
     }
 
-    public Long getUserId() {
-        return userId;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public int getRating() {
@@ -57,11 +76,11 @@ public class Review {
         this.rating = rating;
     }
 
-    public String getComment() {
-        return comment;
+    public LocalDateTime getFecha() {
+        return fecha;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setFecha(LocalDateTime fecha) {
+        this.fecha = fecha;
     }
 }

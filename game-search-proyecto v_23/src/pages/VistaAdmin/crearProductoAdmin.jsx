@@ -2,13 +2,12 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SidebarAdmin from "../../components/SidebarAdmin";
 import "../../styles/crearProductoAdmin.css";
-import { productos } from "../../validaciones/BDproductos";
-import useValidacionesCrearProducto from "../../validaciones/valCrearProducto";
 
 const CrearProductoAdmin = () => {
-  useValidacionesCrearProducto();
   const navigate = useNavigate();
+  const [cargando, setCargando] = useState(false);
 
+  // Estado del formulario
   const [nuevoProducto, setNuevoProducto] = useState({
     nombre: "",
     categoria: "",
@@ -22,32 +21,59 @@ const CrearProductoAdmin = () => {
     setNuevoProducto((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleSubmit = (e) => {
+  // --- FUNCIÓN DE GUARDADO REAL ---
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validar campos mínimos
-    if (!nuevoProducto.nombre || !nuevoProducto.precio) {
-      alert("Por favor completa los campos obligatorios (nombre y precio).");
+    // 1. Validaciones básicas
+    if (!nuevoProducto.nombre || !nuevoProducto.categoria) {
+      alert("Por favor completa el Nombre y la Categoría (son obligatorios para Oracle).");
       return;
     }
 
-    // Crear nuevo producto con ID automático
-    const nuevo = {
-      id: productos.length + 1,
-      nombre: nuevoProducto.nombre,
-      descripcion: nuevoProducto.descripcion,
-      precio: parseFloat(nuevoProducto.precio),
-      plataforma: "sin-especificar", // puedes agregar select luego
-      categoria: nuevoProducto.categoria,
-      stock: parseInt(nuevoProducto.stock) || 0,
-      imagen: null, // si luego agregas subida de imagen
+    setCargando(true);
+
+    // 2. Preparar objeto para el Backend (Java)
+    // NOTA: Java espera 'name' y 'genre'. 
+    // Precio y Stock no se guardarán en Oracle todavía porque tu tabla GAMES no tiene esas columnas,
+    // pero el producto se creará igual.
+    const juegoParaBackend = {
+      name: nuevoProducto.nombre,
+      genre: nuevoProducto.categoria,
+      imageUrl: "" // Enviamos vacío para activar la "Imagen Automática" del backend
     };
 
-    // Agregar al arreglo de productos (simulación local)
-    productos.push(nuevo);
+    try {
+      console.log("Enviando a Oracle Cloud...", juegoParaBackend);
 
-    alert("✅ Producto creado exitosamente (simulado)");
-    navigate("/admin/productos");
+      // 3. Petición POST al Gateway (Puerto 8888)
+      const response = await fetch("http://localhost:8888/api/games", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(juegoParaBackend),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Respuesta Exitosa:", data);
+
+        alert(`✅ Producto creado exitosamente en la Nube!\nID Asignado: ${data.id}`);
+
+        // Redirigir al panel de administración o al catálogo
+        // Nota: Asegúrate de que la ruta "/admin/productos" exista en tu App.jsx
+        navigate("/admin/productos");
+      } else {
+        alert("❌ Error al guardar. El servidor respondió con estado: " + response.status);
+      }
+
+    } catch (error) {
+      console.error("Error de conexión:", error);
+      alert("❌ No se pudo conectar con el Backend (Puerto 8888). Revisa que esté corriendo.");
+    } finally {
+      setCargando(false);
+    }
   };
 
   return (
@@ -56,10 +82,11 @@ const CrearProductoAdmin = () => {
 
       <main className="main-content">
         <header>
-          <h1>Crear Nuevo Producto</h1>
+          <h1>Crear Nuevo Producto (Oracle Cloud)</h1>
         </header>
 
         <form onSubmit={handleSubmit} className="formulario" id="formulario">
+
           <div id="formulario_nombre" className="nombre">
             <label htmlFor="nombre">Nombre</label>
             <div className="formulario__grupo-input">
@@ -67,12 +94,12 @@ const CrearProductoAdmin = () => {
                 type="text"
                 className="formulario__input"
                 id="nombre"
-                placeholder="Ej: Mario Odyssey"
+                placeholder="Ej: God of War"
                 value={nuevoProducto.nombre}
                 onChange={handleChange}
+                required
               />
             </div>
-            <p className="error" id="error-nombre"></p>
           </div>
 
           <div id="formulario_categoria" className="categoria">
@@ -82,12 +109,12 @@ const CrearProductoAdmin = () => {
                 type="text"
                 className="formulario__input"
                 id="categoria"
-                placeholder="Ej: Nintendo Switch"
+                placeholder="Ej: Acción"
                 value={nuevoProducto.categoria}
                 onChange={handleChange}
+                required
               />
             </div>
-            <p className="error" id="error-categoria"></p>
           </div>
 
           <div id="formulario_precio" className="precio">
@@ -97,12 +124,12 @@ const CrearProductoAdmin = () => {
                 type="number"
                 className="formulario__input"
                 id="precio"
-                placeholder="Ej: 29990"
+                placeholder="Ej: 59990"
                 value={nuevoProducto.precio}
                 onChange={handleChange}
               />
             </div>
-            <p className="error" id="error-precio"></p>
+            <small style={{ color: "gray" }}>* Dato visual (no persistente en esta versión de BD)</small>
           </div>
 
           <div id="formulario_stock" className="stock">
@@ -112,12 +139,12 @@ const CrearProductoAdmin = () => {
                 type="number"
                 className="formulario__input"
                 id="stock"
-                placeholder="Ej: 15"
+                placeholder="Ej: 20"
                 value={nuevoProducto.stock}
                 onChange={handleChange}
               />
             </div>
-            <p className="error" id="error-stock"></p>
+            <small style={{ color: "gray" }}>* Dato visual</small>
           </div>
 
           <div id="descripcion" className="descripcion">
@@ -125,16 +152,22 @@ const CrearProductoAdmin = () => {
             <textarea
               id="descripcion"
               rows="4"
-              placeholder="Escribe una breve descripción del producto..."
+              placeholder="Descripción del juego..."
               value={nuevoProducto.descripcion}
               onChange={handleChange}
             ></textarea>
           </div>
 
           <div id="submit" className="submit">
-            <button type="submit" className="btn-primary">
-              Guardar Producto
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={cargando}
+              style={{ opacity: cargando ? 0.7 : 1 }}
+            >
+              {cargando ? "Guardando..." : "Guardar Producto"}
             </button>
+
             <Link to="/admin/productos" className="btn-secondary">
               Cancelar
             </Link>
